@@ -108,3 +108,14 @@ class SQLiteVectorStore(VectorStore):
             rows = self._conn.execute(f"SELECT payload FROM {self._table}").fetchall()
         payloads = [json.loads(r[0]) for r in rows]
         return [p for p in payloads if flt is None or flt(p)]
+    
+    def close(self):
+        """Close the underlying SQLite connection."""
+        with self._lock:
+            self._conn.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

@@ -110,7 +110,20 @@ class TestReleaseHygiene(unittest.TestCase):
 
     def test_core_has_no_module_level_third_party_imports(self):
         import ast, os, sys
-        stdlib = set(sys.stdlib_module_names)
+        if hasattr(sys, "stdlib_module_names"):
+            stdlib = set(sys.stdlib_module_names)
+        else:
+            # Python 3.9 compatibility
+            import sysconfig
+
+            stdlib = set()
+            stdlib_path = sysconfig.get_paths()["stdlib"]
+
+            for _, module_name, _ in __import__("pkgutil").iter_modules([stdlib_path]):
+                stdlib.add(module_name)
+
+            # Builtins aren't returned by iter_modules()
+            stdlib.update(sys.builtin_module_names)
         root = os.path.join(os.path.dirname(__file__), "..", "stratarag")
         if not os.path.isdir(root):
             self.skipTest("source tree only")
@@ -119,7 +132,9 @@ class TestReleaseHygiene(unittest.TestCase):
             for f in files:
                 if not f.endswith(".py"):
                     continue
-                tree = ast.parse(open(os.path.join(dirpath, f)).read())
+                path = os.path.join(dirpath, f)
+                with open(path, "r", encoding="utf-8") as fh:
+                    tree = ast.parse(fh.read(), filename=path)
                 for node in tree.body:   # module level only; lazy is fine
                     names = []
                     if isinstance(node, ast.Import):

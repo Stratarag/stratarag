@@ -71,10 +71,10 @@ class TestSQLiteStore(_StoreContract, unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "v.db")
             e = HashingEmbedder(dim=16)
-            s1 = SQLiteVectorStore(path)
-            s1.add(["k"], e.embed(["persist me"]), [{"text": "persist me"}])
-            s2 = SQLiteVectorStore(path)
-            self.assertEqual(s2.count(), 1)
+            with SQLiteVectorStore(path) as s1:
+                s1.add(["k"], e.embed(["persist me"]), [{"text": "persist me"}])
+            with SQLiteVectorStore(path) as s2:
+                self.assertEqual(s2.count(), 1)
 
     def test_bad_table_name(self):
         with self.assertRaises(ValueError):
