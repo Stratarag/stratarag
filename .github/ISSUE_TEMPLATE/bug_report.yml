@@ -1,0 +1,56 @@
+name: 🐛 Bug report
+description: Something in stratarag behaves incorrectly
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! A **runnable reproduction** is the single most
+        useful thing you can give us — stratarag's `echo` model and local
+        backends mean most bugs can be reproduced with no API keys at all.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Smallest complete script that shows the problem. Prefer model="echo" and the built-in stores so anyone can run it.
+      render: python
+      placeholder: |
+        import stratarag as sr
+        kb = sr.Knowledge.from_texts(["..."])
+        agent = sr.Agent(model="echo", knowledge=kb)
+        print(agent.run("..."))   # expected X, got Y
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behavior
+      placeholder: "Expected: ...  Actual: ... (paste the full traceback if any)"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: stratarag version
+      description: python -c "import stratarag; print(stratarag.__version__)"
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version & OS
+      placeholder: "3.12.1 / Ubuntu 24.04"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options: [Knowledge/chunking, Vector store adapter, Embeddings, Memory, Agent/tools, Pipeline/recipes, Orchestration, Graph, Evals, Playground UI, Packaging/install, Other]
+  - type: textarea
+    id: backends
+    attributes:
+      label: Backends involved (if any)
+      description: Only if the bug involves an external service — which store/embedder/LLM, client package version, and whether the built-in local equivalent works.
+      placeholder: "qdrant-client 1.9.2 against Qdrant 1.10; works fine with store='memory'"

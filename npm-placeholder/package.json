@@ -1,0 +1,9 @@
+{
+  "name": "stratarag",
+  "version": "0.0.1",
+  "description": "Name reservation for StrataRAG (agents that remember; RAG in every shape). The Python package lives on PyPI as 'stratarag'; a TypeScript SDK may live here in the future.",
+  "main": "index.js",
+  "keywords": ["rag", "agents", "memory", "llm", "placeholder"],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/stratarag-ai/stratarag"
+}

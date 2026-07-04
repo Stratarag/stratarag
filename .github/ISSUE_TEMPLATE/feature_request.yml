@@ -1,0 +1,41 @@
+name: ✨ Feature request
+description: Propose new functionality
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you solving?
+      description: Describe the use case, not just the feature. What do you do today instead?
+    validations:
+      required: true
+  - type: textarea
+    id: sketch
+    attributes:
+      label: API sketch
+      description: What would the code look like if this existed? (We design README-first.)
+      render: python
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of addition
+      options:
+        - New vector store adapter
+        - New embedding provider
+        - New LLM provider
+        - New pipeline stage / recipe
+        - New memory capability
+        - Orchestration pattern
+        - Other / core change
+    validations:
+      required: true
+  - type: checkboxes
+    id: fit
+    attributes:
+      label: Design-fit checklist
+      options:
+        - label: This keeps the core dependency-free (external services behind lazy imports)
+        - label: This is testable offline with the echo model / local backends, or behind a skip-guard
+        - label: I'm willing to open a PR for it

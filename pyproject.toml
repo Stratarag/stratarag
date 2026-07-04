@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stratarag"
+version = "0.5.0"
+description = "Agents that remember: memory-first agent & RAG framework with zero required dependencies."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "StrataRAG contributors" }]
+keywords = ["agents", "rag", "memory", "llm", "vector-database"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Zero required dependencies — the whole core runs on the standard library.
+dependencies = []
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.40"]
+st = ["sentence-transformers>=2.7"]          # real embeddings + cross-encoder reranker
+chroma = ["chromadb>=0.5"]
+qdrant = ["qdrant-client>=1.9"]
+pgvector = ["psycopg[binary]>=3.1"]
+pinecone = ["pinecone>=5.0"]
+weaviate = ["weaviate-client>=4.6"]
+milvus = ["pymilvus>=2.4"]
+elasticsearch = ["elasticsearch>=8.13"]
+redis = ["redis>=5.0"]
+mongodb = ["pymongo>=4.7"]
+openai = ["openai>=1.30"]          # OpenAI + Azure OpenAI embeddings
+cohere = ["cohere>=5.5"]
+vertex = ["google-cloud-aiplatform>=1.60"]
+all = ["anthropic>=0.40", "sentence-transformers>=2.7", "chromadb>=0.5",
+       "qdrant-client>=1.9", "psycopg[binary]>=3.1", "pinecone>=5.0",
+       "weaviate-client>=4.6", "pymilvus>=2.4", "elasticsearch>=8.13",
+       "redis>=5.0", "pymongo>=4.7", "openai>=1.30", "cohere>=5.5",
+       "google-cloud-aiplatform>=1.60"]
+
+[project.urls]
+Homepage = "https://github.com/stratarag-ai/stratarag"
+
+[tool.setuptools.packages.find]
+include = ["stratarag*"]
