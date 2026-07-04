@@ -6,21 +6,19 @@ name: Release to PyPI
 #   workflow: release.yml, environment: pypi
 on:
   push:
-    tags: ["v*"]
+    tags:
+      - "v*"
+
   workflow_dispatch:
     inputs:
       target:
         description: "Publish target"
+        required: true
         type: choice
-        workflow_dispatch:
-  inputs:
-    target:
-      description: "Publish target"
-      type: choice
-      options:
-        - testpypi
-        - pypi
-      default: testpypi
+        options:
+          - testpypi
+          - pypi
+        default: testpypi
 
 permissions:
   contents: read
