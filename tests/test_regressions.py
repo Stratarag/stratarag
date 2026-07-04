@@ -123,7 +123,23 @@ class TestReleaseHygiene(unittest.TestCase):
                 stdlib.add(module_name)
 
             # Builtins aren't returned by iter_modules()
-            stdlib.update(sys.builtin_module_names)
+            stdlib.update({
+                "math",
+                "cmath",
+                "array",
+                "binascii",
+                "errno",
+                "fcntl",
+                "grp",
+                "mmap",
+                "resource",
+                "select",
+                "socket",
+                "ssl",
+                "termios",
+                "unicodedata",
+                "zlib",
+            })
         root = os.path.join(os.path.dirname(__file__), "..", "stratarag")
         if not os.path.isdir(root):
             self.skipTest("source tree only")
