@@ -109,55 +109,78 @@ class TestReleaseHygiene(unittest.TestCase):
         self.assertEqual(declared, stratarag.__version__)
 
     def test_core_has_no_module_level_third_party_imports(self):
-        import ast, os, sys
-        if hasattr(sys, "stdlib_module_names"):
-            stdlib = set(sys.stdlib_module_names)
-        else:
-            # Python 3.9 compatibility
-            import sysconfig
+        import ast
+        import importlib.util
+        import os
+        import site
+        import sysconfig
 
-            stdlib = set()
-            stdlib_path = sysconfig.get_paths()["stdlib"]
-
-            for _, module_name, _ in __import__("pkgutil").iter_modules([stdlib_path]):
-                stdlib.add(module_name)
-
-            # Builtins aren't returned by iter_modules()
-            stdlib.update({
-                "math",
-                "cmath",
-                "array",
-                "binascii",
-                "errno",
-                "fcntl",
-                "grp",
-                "mmap",
-                "resource",
-                "select",
-                "socket",
-                "ssl",
-                "termios",
-                "unicodedata",
-                "zlib",
-            })
         root = os.path.join(os.path.dirname(__file__), "..", "stratarag")
         if not os.path.isdir(root):
             self.skipTest("source tree only")
+
+        # Standard library location
+        stdlib = os.path.realpath(sysconfig.get_paths()["stdlib"])
+
+        # All site-packages / dist-packages locations
+        site_paths = set()
+
+        try:
+            site_paths.update(os.path.realpath(p) for p in site.getsitepackages())
+        except Exception:
+            pass
+
+        user_site = site.getusersitepackages()
+        if user_site:
+            site_paths.add(os.path.realpath(user_site))
+
         offenders = []
+
         for dirpath, _, files in os.walk(root):
-            for f in files:
-                if not f.endswith(".py"):
+            for filename in files:
+                if not filename.endswith(".py"):
                     continue
-                path = os.path.join(dirpath, f)
+
+                path = os.path.join(dirpath, filename)
+
                 with open(path, "r", encoding="utf-8") as fh:
                     tree = ast.parse(fh.read(), filename=path)
-                for node in tree.body:   # module level only; lazy is fine
-                    names = []
+
+                for node in tree.body:
+                    modules = []
+
                     if isinstance(node, ast.Import):
-                        names = [a.name.split(".")[0] for a in node.names]
-                    elif isinstance(node, ast.ImportFrom) and node.level == 0 \
-                            and node.module:
-                        names = [node.module.split(".")[0]]
-                    offenders += [f"{f}:{n}" for n in names
-                                  if n not in stdlib and n != "stratarag"]
+                        modules = [a.name.split(".")[0] for a in node.names]
+
+                    elif (
+                        isinstance(node, ast.ImportFrom)
+                        and node.level == 0
+                        and node.module
+                    ):
+                        modules = [node.module.split(".")[0]]
+
+                    for module in modules:
+                        if module == "stratarag":
+                            continue
+
+                        spec = importlib.util.find_spec(module)
+
+                        # Built-in modules (sys, math, time, etc.)
+                        if spec is None or spec.origin in ("built-in", "frozen"):
+                            continue
+
+                        origin = spec.origin
+                        if origin is None:
+                            continue
+
+                        origin = os.path.realpath(origin)
+
+                        # Standard library
+                        if origin.startswith(stdlib):
+                            continue
+
+                        # Third-party package
+                        if any(origin.startswith(p) for p in site_paths):
+                            offenders.append(f"{filename}:{module}")
+
         self.assertEqual(offenders, [])
